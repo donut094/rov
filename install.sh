@@ -8,7 +8,7 @@ YELLOW="\e[33m"
 RESET="\e[0m"
 
 # ====== ตั้งค่า ======
-RAR_URL="YOUR_RAR_URL"
+RAR_URL="https://www.dinoth.shop/rov/dino.rar"
 DEST_DIR="$HOME/storage/downloads/dino"
 RAR_FILE="$DEST_DIR/dino.rar"
 
