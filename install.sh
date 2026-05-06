@@ -17,12 +17,16 @@ echo -e "${YELLOW}📦 เริ่มติดตั้ง Termux environment..
 # ====== ขอ permission ======
 termux-setup-storage || true
 
+# ====== ลด warning pip ======
+export PIP_DISABLE_PIP_VERSION_CHECK=1
+
 # ====== อัปเดตระบบ ======
 echo -e "${YELLOW}🔄 อัปเดตแพ็กเกจ...${RESET}"
-pkg update -y && pkg upgrade -y
+yes | pkg update
+yes | pkg upgrade
 
 # ====== ติดตั้งพื้นฐาน ======
-pkg install -y python unrar wget
+yes | pkg install python unrar wget
 
 # ====== เช็ค Python ======
 if ! command -v python >/dev/null 2>&1; then
@@ -30,13 +34,12 @@ if ! command -v python >/dev/null 2>&1; then
     exit 1
 fi
 
-# ====== อัปเกรด pip ======
-echo -e "${YELLOW}⬆️ อัปเกรด pip...${RESET}"
-python -m pip install --upgrade pip
+# ====== (สำคัญ) ไม่ต้อง upgrade pip ใน Termux ======
+echo -e "${YELLOW}⏭️ ข้ามการอัปเกรด pip (Termux ไม่อนุญาต)...${RESET}"
 
 # ====== ติดตั้งไลบรารี ======
 echo -e "${YELLOW}📚 ติดตั้ง Python packages...${RESET}"
-pip install requests cloudscraper colorama pycryptodome rich
+python -m pip install --no-input requests cloudscraper colorama pycryptodome rich
 
 # ====== สร้างโฟลเดอร์ ======
 echo -e "${YELLOW}📁 เตรียมโฟลเดอร์...${RESET}"
@@ -44,12 +47,24 @@ mkdir -p "$DEST_DIR"
 
 # ====== ดาวน์โหลดไฟล์ ======
 echo -e "${YELLOW}⬇️ กำลังดาวน์โหลดไฟล์...${RESET}"
-wget -O "$RAR_FILE" "$RAR_URL"
+wget -q --show-progress -O "$RAR_FILE" "$RAR_URL"
+
+# ====== เช็คไฟล์โหลดสำเร็จ ======
+if [ ! -f "$RAR_FILE" ]; then
+    echo -e "${RED}❌ ดาวน์โหลดไฟล์ไม่สำเร็จ${RESET}"
+    exit 1
+fi
 
 # ====== แตกไฟล์ ======
 echo -e "${YELLOW}📦 กำลังแตกไฟล์...${RESET}"
 cd "$DEST_DIR"
-unrar x -o+ dino.rar
+yes | unrar x -o+ dino.rar
+
+# ====== เช็คไฟล์ก่อนรัน ======
+if [ ! -f "dino.py" ]; then
+    echo -e "${RED}❌ ไม่พบ dino.py${RESET}"
+    exit 1
+fi
 
 # ====== รันโปรแกรม ======
 echo -e "${GREEN}🚀 กำลังรัน dino.py...${RESET}"
